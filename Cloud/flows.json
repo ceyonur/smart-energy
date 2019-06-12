@@ -1,0 +1,145 @@
+[
+    {
+        "id": "62344c6.bd4ac34",
+        "type": "tab",
+        "label": "SmartEnergy",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "9942575b.68f338",
+        "type": "function",
+        "z": "62344c6.bd4ac34",
+        "name": "updateSensorData",
+        "func": "var Web3 = global.get('web3');\nvar abi = [ { \"constant\": false, \"inputs\": [], \"name\": \"kill\", \"outputs\": [], \"payable\": false, \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"constant\": false, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"name\": \"pay_device_data\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": true, \"stateMutability\": \"payable\", \"type\": \"function\" }, { \"constant\": false, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" }, { \"name\": \"data\", \"type\": \"uint256\" } ], \"name\": \"set_device_data\", \"outputs\": [ { \"name\": \"index\", \"type\": \"uint256\" }, { \"name\": \"timestamp\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"constant\": false, \"inputs\": [ { \"name\": \"cost\", \"type\": \"uint256\" } ], \"name\": \"set_energy_cost\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"nonpayable\", \"type\": \"function\" }, { \"inputs\": [ { \"name\": \"cost\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"nonpayable\", \"type\": \"constructor\" }, { \"anonymous\": false, \"inputs\": [ { \"indexed\": true, \"name\": \"device_id\", \"type\": \"bytes32\" }, { \"indexed\": false, \"name\": \"index\", \"type\": \"uint256\" }, { \"indexed\": false, \"name\": \"timestamp\", \"type\": \"uint256\" }, { \"indexed\": false, \"name\": \"data\", \"type\": \"uint256\" } ], \"name\": \"log_action\", \"type\": \"event\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"index\", \"type\": \"uint256\" } ], \"name\": \"get_device_at_index\", \"outputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"name\": \"get_device_bill\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"name\": \"get_device_consumption\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [], \"name\": \"get_device_count\", \"outputs\": [ { \"name\": \"count\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" }, { \"name\": \"timestamp\", \"type\": \"uint256\" } ], \"name\": \"get_device_data\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"name\": \"get_device_timestamps\", \"outputs\": [ { \"name\": \"timestamp\", \"type\": \"uint256[]\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [], \"name\": \"get_energy_cost\", \"outputs\": [ { \"name\": \"data\", \"type\": \"uint256\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [], \"name\": \"get_owned_devices\", \"outputs\": [ { \"name\": \"device_ids\", \"type\": \"bytes32[]\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" }, { \"constant\": true, \"inputs\": [ { \"name\": \"device_id\", \"type\": \"bytes32\" } ], \"name\": \"is_device_present\", \"outputs\": [ { \"name\": \"result\", \"type\": \"bool\" } ], \"payable\": false, \"stateMutability\": \"view\", \"type\": \"function\" } ];\nvar main_account = \"0x6D1697C62d66176795214fA2403Cedfdd6a8B65C\";// YOUR ACCOUNT;\nvar contract_addr = \"0xcde24e25421174829a704e6411cc5ca1ce25756f\";\nvar password = \"smartenergy13device\"; // your password\nvar web3;\n//web3.js, checking if node is running\nweb3 = new Web3(new Web3.providers.HttpProvider(\"http://localhost:8545\"));\nif (!web3.isConnected()) {\n msg.payload = \"node not connected\";\n return msg;\n} \nvar deviceMonitor = web3.eth.contract(abi).at(contract_addr); // deployed contract address\nweb3.personal.unlockAccount(main_account,password,msg.payload);\n\nvar transactionObject = {\n  from: main_account,\n  gasPrice: web3.eth.gasPrice,\n  gas: 500000\n};\n\nvar devices = flow.get(\"devices\") || [];\nhash_payload = {}\nfor(const d of devices){\n    device_id_sha3 = web3.sha3(d)\n    var retcont = deviceMonitor.set_device_data(device_id_sha3, flow.get(d), transactionObject); // Parameters\n    hash_payload[d] = {\"sha3\":device_id_sha3, \"value\": flow.get(d)};\n    if(retcont){\n        flow.set(d, 0);\n    }\n}\nmsg.payload= {\"tx_hash\": retcont, hash_payload};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 730,
+        "y": 500,
+        "wires": [
+            [
+                "690a007f.eff47"
+            ]
+        ]
+    },
+    {
+        "id": "d1658997.7b712",
+        "type": "function",
+        "z": "62344c6.bd4ac34",
+        "name": "accumulator",
+        "func": "device_id = msg.payload['deviceName']\nconsumption_per_sec = msg.payload['kws'];\nif(isNaN(consumption_per_sec)){\n   msg.payload = \"sensor read error\";\n   return msg;\n}\n\ncurrent_devices = flow.get(\"devices\") || [];\nif(current_devices.indexOf(device_id) === -1) {\n    current_devices.push(device_id);\n    flow.set(\"devices\", current_devices);\n} \ncurrent_consumption = flow.get(device_id) || 0;\nflow.set(device_id, current_consumption + consumption_per_sec);\n\nmsg.payload = flow.get(device_id);\nreturn msg;   \n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 280,
+        "wires": [
+            [
+                "6657366.49de748"
+            ]
+        ]
+    },
+    {
+        "id": "e7f4f6ee.5e477",
+        "type": "inject",
+        "z": "62344c6.bd4ac34",
+        "name": "",
+        "topic": "",
+        "payload": "300",
+        "payloadType": "num",
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "x": 250,
+        "y": 500,
+        "wires": [
+            [
+                "9942575b.68f338"
+            ]
+        ]
+    },
+    {
+        "id": "db2991ab.1ed8b",
+        "type": "json",
+        "z": "62344c6.bd4ac34",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 710,
+        "y": 200,
+        "wires": [
+            [
+                "d1658997.7b712"
+            ]
+        ]
+    },
+    {
+        "id": "690a007f.eff47",
+        "type": "debug",
+        "z": "62344c6.bd4ac34",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 950,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "6657366.49de748",
+        "type": "debug",
+        "z": "62344c6.bd4ac34",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 930,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "5e6562be.3b28b4",
+        "type": "mqtt in",
+        "z": "62344c6.bd4ac34",
+        "name": "",
+        "topic": "nbasaran/feeds/kws",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "dfdf144f.0ba2f8",
+        "x": 320,
+        "y": 240,
+        "wires": [
+            [
+                "db2991ab.1ed8b"
+            ]
+        ]
+    },
+    {
+        "id": "dfdf144f.0ba2f8",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "",
+        "broker": "io.adafruit.com",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "15",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
