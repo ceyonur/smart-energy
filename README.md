@@ -1,5 +1,3 @@
-# SmartEnergy
-
 # One Pager
 ![One Pager](https://user-images.githubusercontent.com/30317984/59349902-73578c80-8d23-11e9-8e33-a10f3352173e.jpg)
 
